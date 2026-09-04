@@ -36,8 +36,10 @@ mxh/
 - Module chỉ giao tiếp qua interface ở tầng Application (ArchUnitNET chặn tham chiếu chéo).
 
 ## Trạng thái hiện tại
-Khởi tạo skeleton — chưa có project .NET. Bước tiếp theo: **GĐ0 — Khởi tạo & Walking Skeleton**
-(`dotnet new` solution + project, health check, error model, CI), sau đó Dockerfile/CD mới build được.
+**GĐ0 + GĐ0B xong.** Walking Skeleton chạy thật trên Internet: `https://mxh.banhgao.net`
+(`/api/v1/ping`, `/health/ready`, `/swagger`). Backend deploy tay trên VM OCI (arm64) sau apache
+reverse proxy (path-based: `/api`,`/swagger`,`/health` → API; `/` để dành cho Next.js sau).
+Bước tiếp theo: **GĐ1 — Identity & Access** (đăng ký/verify email, JWT + refresh rotation, RBAC 3 tầng).
 Lộ trình đầy đủ GĐ0→GĐ8: xem `docs/ke-hoach-trien-khai.md`.
 
 ## Tài liệu (trong repo)
