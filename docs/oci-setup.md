@@ -173,6 +173,11 @@ jobs:
 
 ## viii. compose staging: Caddy → API → Postgres + Redis
 
+> **VM đã có sẵn apache/nginx giữ 80/443?** Đừng tắt nó. Dùng biến thể KHÔNG Caddy:
+> `deploy/docker-compose.staging.apache.yml` (API chỉ mở `127.0.0.1:8080`) + cho apache proxy vào
+> theo mẫu `deploy/apache-socialapp.conf.example`. Bỏ qua phần Caddy/Caddyfile bên dưới.
+
+
 `~/app/deploy/docker-compose.staging.yml`:
 ```yaml
 name: socialmedia-staging

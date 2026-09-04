@@ -1,0 +1,65 @@
+# Biến thể staging cho VM ĐÃ CÓ apache (hoặc reverse proxy khác) giữ 80/443.
+# Không có Caddy; API chỉ mở 127.0.0.1:8080 (localhost) để apache proxy vào — KHÔNG lộ ra Internet.
+# apache lo TLS + domain (xem deploy/apache-socialapp.conf.example). Dùng:
+#   docker compose -f docker-compose.staging.apache.yml up -d
+name: socialapp-staging
+
+networks:
+  internal:
+
+volumes:
+  pgdata:
+
+services:
+  api:
+    image: ghcr.io/ricecracker12/30inf067_btl/api:staging
+    restart: unless-stopped
+    env_file: [./.env]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      ASPNETCORE_URLS: "http://+:8080"
+    ports: ["127.0.0.1:8080:8080"]     # chỉ localhost — apache trên host proxy vào đây
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  migrate:
+    image: ghcr.io/ricecracker12/30inf067_btl/api:staging
+    profiles: ["tools"]
+    env_file: [./.env]
+    entrypoint: ["dotnet", "SocialApp.Api.dll", "--migrate"]
+    networks: [internal]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: socialapp
+      POSTGRES_USER: socialapp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U socialapp -d socialapp"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

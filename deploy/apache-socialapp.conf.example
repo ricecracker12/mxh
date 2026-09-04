@@ -1,0 +1,26 @@
+# Mẫu VirtualHost apache proxy subdomain -> container API (127.0.0.1:8080).
+# Sửa ServerName + đường dẫn cert cho khớp domain của bạn, rồi:
+#   sudo a2enmod proxy proxy_http ssl headers
+#   sudo cp apache-socialapp.conf.example /etc/apache2/sites-available/socialapp.conf
+#   sudo a2ensite socialapp && sudo apache2ctl configtest && sudo systemctl reload apache2
+
+<VirtualHost *:80>
+    ServerName mxh.banhgao.net
+    Redirect permanent / https://mxh.banhgao.net/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName mxh.banhgao.net
+
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/cloudflare/banhgao.net.pem
+    SSLCertificateKeyFile /etc/ssl/cloudflare/banhgao.net.key
+
+    ProxyPreserveHost On
+    ProxyPass        / http://127.0.0.1:8080/
+    ProxyPassReverse / http://127.0.0.1:8080/
+    RequestHeader set X-Forwarded-Proto "https"
+
+    ErrorLog  ${APACHE_LOG_DIR}/socialapp-error.log
+    CustomLog ${APACHE_LOG_DIR}/socialapp-access.log combined
+</VirtualHost>
