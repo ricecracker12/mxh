@@ -1,0 +1,7 @@
+# Reverse proxy TLS cho API. Đổi "mxh.banhgao.net" thành subdomain thật của bạn (phải là subdomain
+# 1 cấp của domain có cert wildcard trên host). Cloudflare SSL mode = Full (strict).
+mxh.banhgao.net {
+    encode gzip
+    tls /etc/ssl/cloudflare/banhgao.net.pem /etc/ssl/cloudflare/banhgao.net.key
+    reverse_proxy api:8080
+}

@@ -4,6 +4,14 @@ using Serilog;
 using Serilog.Formatting.Compact;
 using SocialApp.SharedKernel.DependencyInjection;
 
+// Service `migrate` (one-shot, chạy ở bước deploy) gọi với cờ --migrate. GĐ0 chưa có DbContext nên
+// đây là no-op thoát 0 — tránh treo container. Từ GĐ1 sẽ apply EF migration tại đây rồi thoát.
+if (args.Contains("--migrate"))
+{
+    Console.WriteLine("[migrate] GĐ0: chưa có migration nào để áp dụng. Thoát 0.");
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Logging: Serilog JSON (compact) + correlation id qua LogContext ---

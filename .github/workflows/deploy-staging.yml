@@ -18,8 +18,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/api:staging
-            ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+            ghcr.io/ricecracker12/30inf067_btl/api:staging
+            ghcr.io/ricecracker12/30inf067_btl/api:${{ github.sha }}
   deploy:
     needs: build
     runs-on: ubuntu-latest

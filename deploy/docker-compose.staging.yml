@@ -1,0 +1,78 @@
+# Staging trên OCI Ampere A1 (arm64). Đặt file này + Caddyfile + .env tại ~/app/deploy/ trên server.
+# Postgres/Redis KHÔNG mở port ra host — chỉ Caddy mở 80/443. Xem docs/oci-setup.md.
+name: socialapp-staging
+
+networks:
+  edge:
+  internal:
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+services:
+  caddy:                                 # cổng vào duy nhất — chỉ nó mở 80/443
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /etc/ssl/cloudflare:/etc/ssl/cloudflare:ro   # cert Cloudflare Origin đã có sẵn trên host
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge, internal]
+    depends_on: [api]
+
+  api:
+    # Repo name của GHCR phải viết THƯỜNG toàn bộ (30INF067_btl -> 30inf067_btl).
+    image: ghcr.io/ricecracker12/30inf067_btl/api:staging
+    restart: unless-stopped
+    env_file: [./.env]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      ASPNETCORE_URLS: "http://+:8080"
+    networks: [internal]                 # KHÔNG mở port ra host
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  migrate:                               # one-shot; CD gọi `run --rm migrate` trước khi up api
+    image: ghcr.io/ricecracker12/30inf067_btl/api:staging
+    profiles: ["tools"]                  # không tự chạy khi `up -d`
+    env_file: [./.env]
+    entrypoint: ["dotnet", "SocialApp.Api.dll", "--migrate"]
+    networks: [internal]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: socialapp
+      POSTGRES_USER: socialapp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U socialapp -d socialapp"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

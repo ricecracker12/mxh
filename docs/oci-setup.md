@@ -85,9 +85,9 @@ cd ~/app/deploy
 umask 077
 cat > .env <<'EOF'
 POSTGRES_PASSWORD=<openssl rand -base64 24>
-ConnectionStrings__Postgres=Host=postgres;Database=socialmedia;Username=app;Password=<trùng trên>
+ConnectionStrings__Postgres=Host=postgres;Database=socialapp;Username=socialapp;Password=<trùng trên>
 Jwt__SigningKey=<openssl rand -base64 48>
-Redis__ConnectionString=redis:6379
+ConnectionStrings__Redis=redis:6379
 R2__Endpoint=https://<gido>.r2.cloudflarestorage.com
 R2__Bucket=socialmedia-staging
 R2__AccessKey=<access key id>
@@ -193,7 +193,7 @@ services:
     depends_on: [api]
 
   api:
-    image: ghcr.io/ricecracker12/mxh/api:staging   # repo = mxh; thay <username-github> bằng tài khoản GitHub của bạn
+    image: ghcr.io/ricecracker12/30inf067_btl/api:staging   # repo name viết THƯỜNG toàn bộ (Docker không nhận chữ hoa)
     restart: unless-stopped
     env_file: [./.env]
     environment:
@@ -201,7 +201,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
     networks: [internal]              # KHÔNG mở port ra host
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/health"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health/ready"]
       interval: 15s
       timeout: 3s
       retries: 3
@@ -210,7 +210,7 @@ services:
       redis: { condition: service_healthy }
 
   migrate:                            # one-shot, CD gọi trước khi up api
-    image: ghcr.io/ricecracker12/mxh/api:staging   # repo = mxh; thay <username-github> bằng tài khoản GitHub của bạn
+    image: ghcr.io/ricecracker12/30inf067_btl/api:staging   # repo name viết THƯỜNG toàn bộ (Docker không nhận chữ hoa)
     profiles: ["tools"]
     env_file: [./.env]
     entrypoint: ["dotnet", "SocialApp.Api.dll", "--migrate"]
@@ -222,13 +222,13 @@ services:
     image: postgres:16               # theo PTTK (Postgres 16)
     restart: unless-stopped
     environment:
-      POSTGRES_DB: socialmedia
-      POSTGRES_USER: app
+      POSTGRES_DB: socialapp
+      POSTGRES_USER: socialapp
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes: [pgdata:/var/lib/postgresql/data]
     networks: [internal]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d socialmedia"]
+      test: ["CMD-SHELL", "pg_isready -U socialapp -d socialapp"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -269,7 +269,7 @@ docker compose -f docker-compose.staging.yml up -d
 docker compose -f docker-compose.staging.yml ps
 ```
 
-**Kiểm tra:** `curl -I https://mxh.banhgao.net/api/health` → 200 · `docker compose ps` tất cả `healthy`
+**Kiểm tra:** `curl -I https://mxh.banhgao.net/health/ready` → 200 · `docker compose ps` tất cả `healthy`
 · `nmap -Pn <IP>` chỉ 80/443 · `psql -h <IP>` timeout (DB không public).
 
 ### Cần chuẩn bị/sửa thêm cho mục viii
@@ -279,7 +279,8 @@ docker compose -f docker-compose.staging.yml ps
 - **`${POSTGRES_PASSWORD}`** được Compose thay từ `.env` **cùng thư mục** → `.env` bắt buộc nằm cạnh compose.
 - **`POSTGRES_USER`/`POSTGRES_DB`** phải khớp connection string trong `.env` (`Username=app;Database=socialmedia`).
 - **Dockerfile** `mxh/Dockerfile` (context = gốc repo): multi-stage, `linux/arm64`, non-root, output `SocialApp.Api.dll`.
-- **Migrate:** app hỗ trợ cờ `--migrate`, hoặc đổi `entrypoint` service `migrate` sang chạy **EF bundle**.
+- **Migrate:** app đã nhận cờ `--migrate`. **GĐ0 là no-op thoát 0** (chưa có DbContext) nên service
+  `migrate` chạy xong ngay; từ **GĐ1** cờ này sẽ apply EF migration thật rồi thoát.
 - ⚠️ **Healthcheck cần `curl` nhưng image `aspnet` không có sẵn.** Chọn 1:
   - Thêm vào Dockerfile: `RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*`, **hoặc**
   - Đổi healthcheck sang không cần curl, ví dụ dùng chính runtime:
