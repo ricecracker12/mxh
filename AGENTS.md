@@ -88,7 +88,7 @@ client_msg_id khử trùng), `notifications`(UQ recipient+group_key), `reports`,
 - **BR-09** chỉ bạn bè mới chat; hủy kết bạn → hội thoại chỉ đọc (thay tính năng chặn).
 
 ## 9. Quy ước API
-- REST, tiền tố `/api/v1`; JSON; Bearer JWT; OpenAPI/Swagger (chỉ bật ở Development).
+- REST, tiền tố `/api/v1`; JSON; Bearer JWT; OpenAPI/Swagger (bật ở Development + Staging, TẮT ở Production).
 - Lỗi theo **RFC 7807 Problem Details** `{type,title,status,errors,traceId}`.
 - Phân trang **keyset/cursor** (limit 20, tối đa 50), sort ổn định `(created_at, id)` — không OFFSET.
 - Rate limit 100 req/phút/user (10 cho auth). Idempotency: PUT reaction, message theo `client_msg_id`.

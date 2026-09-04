@@ -50,8 +50,8 @@ var app = builder.Build();
 app.UseSerilogRequestLogging();
 app.UseSharedKernel();
 
-// Swagger chỉ ở Development (không lộ schema ở staging/production).
-if (app.Environment.IsDevelopment())
+// Swagger bật ở Development + Staging (để demo/test trên staging); TẮT ở Production.
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
