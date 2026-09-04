@@ -1,0 +1,31 @@
+# ---- Secrets / environment ----
+.env
+.env.*
+!.env.example
+**/appsettings.*.Production.json
+deploy/origin-cert/
+*.pem
+*.key
+
+# ---- .NET ----
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/
+artifacts/
+TestResults/
+
+# ---- Node / Next.js (frontend) ----
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.idea/

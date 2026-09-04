@@ -1,0 +1,21 @@
+name: ci
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore
+        run: dotnet restore SocialApp.sln
+      - name: Build
+        run: dotnet build SocialApp.sln -c Release --no-restore
+      - name: Test
+        run: dotnet test SocialApp.sln -c Release --no-build --verbosity normal

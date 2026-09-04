@@ -1,0 +1,56 @@
+# Hạ tầng dev cục bộ (GĐ0). Chạy từ gốc repo:
+#   docker compose -f deploy/docker-compose.dev.yml up -d --build
+# Có default inline nên chạy được ngay không cần .env; muốn đổi mật khẩu thì tạo deploy/.env (xem .env.example).
+name: socialapp-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: socialapp
+      POSTGRES_USER: socialapp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-socialapp}
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U socialapp -d socialapp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Mailpit: SMTP giả cho luồng xác minh email (dev). UI: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ["8025:8025", "1025:1025"]
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=socialapp;Username=socialapp;Password=${POSTGRES_PASSWORD:-socialapp}"
+      ConnectionStrings__Redis: "redis:6379"
+    ports: ["8080:8080"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  pgdata:

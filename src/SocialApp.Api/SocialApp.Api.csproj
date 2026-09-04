@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SocialApp.SharedKernel\SocialApp.SharedKernel.csproj" />
+    <ProjectReference Include="..\Modules\Identity\SocialApp.Modules.Identity.csproj" />
+    <ProjectReference Include="..\Modules\Profile\SocialApp.Modules.Profile.csproj" />
+    <ProjectReference Include="..\Modules\SocialGraph\SocialApp.Modules.SocialGraph.csproj" />
+    <ProjectReference Include="..\Modules\Content\SocialApp.Modules.Content.csproj" />
+    <ProjectReference Include="..\Modules\Messaging\SocialApp.Modules.Messaging.csproj" />
+    <ProjectReference Include="..\Modules\Notification\SocialApp.Modules.Notification.csproj" />
+    <ProjectReference Include="..\Modules\Moderation\SocialApp.Modules.Moderation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

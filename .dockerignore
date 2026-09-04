@@ -1,0 +1,17 @@
+# Không copy vào build context của backend
+**/bin/
+**/obj/
+.git/
+.github/
+.vs/
+*.user
+frontend/
+tests/
+deploy/
+docs/
+**/appsettings.*.json
+!**/appsettings.json
+.env
+*.md
+Dockerfile
+.dockerignore

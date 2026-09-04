@@ -1,0 +1,6 @@
+# Chuẩn hóa line-ending: LF trong repo cho mã nguồn/script để tránh churn giữa Windows và Linux (CI/OCI).
+* text=auto eol=lf
+*.sln text eol=crlf
+*.png binary
+*.jpg binary
+*.pdf binary
