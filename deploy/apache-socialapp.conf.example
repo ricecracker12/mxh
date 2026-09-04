@@ -17,8 +17,8 @@
     SSLCertificateKeyFile /etc/ssl/cloudflare/banhgao.net.key
 
     ProxyPreserveHost On
-    ProxyPass        / http://127.0.0.1:8080/
-    ProxyPassReverse / http://127.0.0.1:8080/
+    ProxyPass        / http://127.0.0.1:18080/
+    ProxyPassReverse / http://127.0.0.1:18080/
     RequestHeader set X-Forwarded-Proto "https"
 
     ErrorLog  ${APACHE_LOG_DIR}/socialapp-error.log

@@ -18,7 +18,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
       ASPNETCORE_URLS: "http://+:8080"
-    ports: ["127.0.0.1:8080:8080"]     # chỉ localhost — apache trên host proxy vào đây
+    ports: ["127.0.0.1:18080:8080"]    # chỉ localhost — apache trên host proxy vào đây (18080 để tránh trùng 8080)
     networks: [internal]
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8080/health/ready"]
