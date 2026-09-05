@@ -25,7 +25,7 @@ mxh/
 │  ├─ SocialApp.IntegrationTests
 │  ├─ SocialApp.ArchitectureTests    # ArchUnitNET chặn tham chiếu chéo module
 │  └─ load/                          # k6 (feed @1.000 CCU)
-├─ deploy/                           # docker-compose.staging.yml, Caddyfile (không chứa .env)
+├─ deploy/                           # compose dev + staging (2 biến thể: caddy / apache), không chứa .env
 └─ frontend/                         # Next.js 14 (làm sau khi backend ổn định)
 ```
 
@@ -37,8 +37,14 @@ mxh/
 
 ## Trạng thái hiện tại
 **GĐ0 + GĐ0B xong.** Walking Skeleton chạy thật trên Internet: `https://mxh.banhgao.net`
-(`/api/v1/ping`, `/health/ready`, `/swagger`). Backend deploy tay trên VM OCI (arm64) sau apache
-reverse proxy (path-based: `/api`,`/swagger`,`/health` → API; `/` để dành cho Next.js sau).
+(`/api/v1/ping`, `/health/ready`, `/swagger`). VM OCI (arm64) chạy apache reverse proxy
+path-based (`/api`,`/swagger`,`/health` → API; `/` để dành cho Next.js sau).
+
+**CD tự động (không còn deploy tay):** merge vào `develop` → GitHub Actions build image
+`linux/arm64` → push ghcr → SSH vào VM chạy `docker-compose.staging.apache.yml`
+(`run --rm migrate` → `up -d --remove-orphans`). Script deploy có `set -e` nên deploy hỏng thì
+CD báo **đỏ** — tránh lặp lại sự cố CD báo xanh trong khi staging đã sập.
+
 Bước tiếp theo: **GĐ1 — Identity & Access** (đăng ký/verify email, JWT + refresh rotation, RBAC 3 tầng).
 Lộ trình đầy đủ GĐ0→GĐ8: xem `docs/ke-hoach-trien-khai.md`.
 
