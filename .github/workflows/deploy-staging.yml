@@ -33,9 +33,10 @@ jobs:
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
+            set -e                                   # deploy hỏng thì CD phải ĐỎ (trước đây prune -f ở cuối che mất lỗi)
             cd ~/app/deploy
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose -f docker-compose.staging.yml pull
-            docker compose -f docker-compose.staging.yml run --rm migrate
-            docker compose -f docker-compose.staging.yml up -d
+            docker compose -f docker-compose.staging.apache.yml pull
+            docker compose -f docker-compose.staging.apache.yml run --rm migrate
+            docker compose -f docker-compose.staging.apache.yml up -d --remove-orphans
             docker image prune -f
